@@ -35,28 +35,37 @@ import tkinter as tk
 from collections import deque
 
 def redraw():
-    rad = q_blade_r.popleft()
-    x,y = q_blade_xy.popleft(),q_blade_xy.popleft()
-    rad -=10
-    canvas.create_oval(x-rad, y-rad, x+rad, y+rad, fill="red",tags="blade")
-    if rad > 0: #проверка на нулевой радиус
-        q_blade_xy.append(x)
-        q_blade_xy.append(y)
-        q_blade_r.append(rad)
-    
+    if len(q_blade_xy) == 2 :
+       x,y = q_blade_xy.popleft(),q_blade_xy.popleft()
+       while  len(q_blade_xy) != 20:
+            q_blade_xy.append(x)
+            q_blade_xy.append(y)
+    rad=0
+    print(q_blade_xy)
+    if 2<= len(q_blade_xy):
+        while rad != 50 :
+            x,y = q_blade_xy.popleft(),q_blade_xy.popleft()
+            rad +=10
+            canvas.create_oval(x-rad, y-rad, x+rad, y+rad, fill="red",tags="blade")
+            if len(q_blade_xy)<(50/10*2*2)-2:
+                q_blade_xy.append(x)
+                q_blade_xy.append(y)
+    if rad==50:
+        while rad != 0 :
+            x,y = q_blade_xy.popleft(),q_blade_xy.popleft()
+            rad -=10
+            canvas.create_oval(x-rad, y-rad, x+rad, y+rad, fill="red",tags="blade")
+            if len(q_blade_xy)<(50/10*2*2)-2:
+                q_blade_xy.append(x)
+                q_blade_xy.append(y)    
 
 
 def draw_circle(event):
-    global i
     canvas.delete("blade")
     x, y = event.x, event.y
     q_blade_xy.append(x)
     q_blade_xy.append(y)
-    q_blade_r.append(radius)
-    canvas.create_oval(x-radius, y-radius, x+radius, y+radius, fill="red",tags="blade")
-    if i != 1 :
-        redraw()
-    i = 0
+    redraw()
     
 
     
@@ -70,10 +79,10 @@ q_blade_r = deque()
 
 width, height = 800, 600
 radius = 50
-i=1
+
 
 canvas = tk.Canvas(root, width=width, height=height, bg="white")
 canvas.pack()
-canvas.bind("<Button-1>", draw_circle)  
+canvas.bind("<Motion>", draw_circle)  
 
 root.mainloop()
