@@ -37,28 +37,27 @@ from collections import deque
 def redraw():
     if len(q_blade_xy) == 2 :
        x,y = q_blade_xy.popleft(),q_blade_xy.popleft()
-       while  len(q_blade_xy) != 20:
+       while  len(q_blade_xy) != (20+20/4)*2:
             q_blade_xy.append(x)
             q_blade_xy.append(y)
     rad=0
     print(q_blade_xy)
     if 2<= len(q_blade_xy):
-        while rad != 50 :
+        while rad!=20:
             x,y = q_blade_xy.popleft(),q_blade_xy.popleft()
-            rad +=10
+            rad +=1
             canvas.create_oval(x-rad, y-rad, x+rad, y+rad, fill="red",tags="blade")
-            if len(q_blade_xy)<(50/10*2*2)-2:
+            if len(q_blade_xy)<((20+20/4)*2)-2:
                 q_blade_xy.append(x)
                 q_blade_xy.append(y)
-    if rad==50:
+    if rad==20:
         while rad != 0 :
             x,y = q_blade_xy.popleft(),q_blade_xy.popleft()
-            rad -=10
+            rad -=4
             canvas.create_oval(x-rad, y-rad, x+rad, y+rad, fill="red",tags="blade")
-            if len(q_blade_xy)<(50/10*2*2)-2:
+            if len(q_blade_xy)<((20+20/4)*2)-2:
                 q_blade_xy.append(x)
                 q_blade_xy.append(y)    
-
 
 def draw_circle(event):
     canvas.delete("blade")
@@ -67,22 +66,17 @@ def draw_circle(event):
     q_blade_xy.append(y)
     redraw()
     
-
-    
-
-
 root = tk.Tk()
 root.title("Draw Circle on Right Click")
 
+
 q_blade_xy = deque()
-q_blade_r = deque()
 
 width, height = 800, 600
-radius = 50
-
 
 canvas = tk.Canvas(root, width=width, height=height, bg="white")
-canvas.pack()
-canvas.bind("<Motion>", draw_circle)  
+canvas.pack(cursor="pencil")
+canvas.bind('<B1-Motion>',draw_circle)
+# ttk.Label(text="Hello World!", cursor="pencil").pack(anchor=CENTER, expand=1)
 
 root.mainloop()
