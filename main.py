@@ -36,38 +36,69 @@ from collections import deque
 def redraw():
     if len(q_blade_xy) == 2 :
        x,y = q_blade_xy.popleft(),q_blade_xy.popleft()
-       while  len(q_blade_xy) != 20:
+       while  len(q_blade_xy) != ((20+20/4)*2):
             q_blade_xy.append(x)
             q_blade_xy.append(y)
     rad=0
     print(q_blade_xy)
     if 2<= len(q_blade_xy):
-        while rad != 50 :
+        while rad != 20 :
             x,y = q_blade_xy.popleft(),q_blade_xy.popleft()
             rad +=1
             canvas.create_oval(x-rad, y-rad, x+rad, y+rad, fill="red",tags="blade")
-    if rad==50:
+            if len(q_blade_xy)<((20+20/4)*2)-2:
+                q_blade_xy.append(x)
+                q_blade_xy.append(y)
+                
+    if rad==20:
         while rad != 0 :
             x,y = q_blade_xy.popleft(),q_blade_xy.popleft()
-            rad -=1
+            rad -=4
             canvas.create_oval(x-rad, y-rad, x+rad, y+rad, fill="red",tags="blade")
+            if len(q_blade_xy)<((20+20/4)*2)-2:
+                q_blade_xy.append(x)
+                q_blade_xy.append(y)  
 
-    if len(q_blade_xy)<(50*2*2)-2:
-        q_blade_xy.append(x)
-        q_blade_xy.append(y)    
+def delete_circle():
+
+    if 2<= len(q_blade_xy):
+        while rad != 20 :
+            x,y = q_blade_xy.popleft(),q_blade_xy.popleft()
+            rad +=1
+            canvas.create_oval(x-rad, y-rad, x+rad, y+rad, fill="red",tags="blade")
+            if len(q_blade_xy)<((20+20/4)*2)-2:
+                q_blade_xy.append(x)
+                q_blade_xy.append(y)
+                
+    if rad==20:
+        while rad != 0 :
+            x,y = q_blade_xy.popleft(),q_blade_xy.popleft()
+            rad -=4
+            canvas.create_oval(x-rad, y-rad, x+rad, y+rad, fill="red",tags="blade")
+            if len(q_blade_xy)<((20+20/4)*2)-2:
+                q_blade_xy.append(x)
+                q_blade_xy.append(y)
 
 
 def draw_circle(event):
+    global idle_timer
     canvas.delete("blade")
     x, y = event.x, event.y
     q_blade_xy.append(x)
     q_blade_xy.append(y)
     redraw()
+    root.after_cancel(idle_timer)
+    idle_timer = root.after(1000, clear_circles)  # 1000 мс бездействия для очистки
+
+def clear_circles():
+    canvas.delete("blade")
+    q_blade_xy.clear()
 
 
 root = tk.Tk()
 root.title("Draw Circle on Right Click")
 q_blade_xy = deque()
+idle_timer = root.after(1000, clear_circles) 
 
 width, height = 800, 600
 root.geometry("900x700")

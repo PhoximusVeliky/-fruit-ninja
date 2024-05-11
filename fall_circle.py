@@ -11,14 +11,14 @@ def move_circle(circle, x, y, move_func):
     coords = canvas.coords(circle)
     # Проверяем, не вышел ли круг за нижнюю границу холста
     if coords[3] < 600:  # 600 - это высота холста
-        window.after(10, move_func, circle, x + x_offset, y + y_offset, move_func)
+        window.after(1000, move_func, circle, x + x_offset, y + y_offset, move_func)
 
 # Функция для запуска движения круга
 def start_movement(move_func):
-    for i in range(3):  # Создаем три круга для примера
+    for i in range(1):  # Создаем три круга для примера
         # Случайные начальные координаты для кругов
-        start_x = random.randint(50, 750)
-        start_y = random.randint(50, 550)
+        start_x = 0#random.randint(50, 750)
+        start_y = 0#random.randint(50, 550)
         circle = canvas.create_oval(start_x, start_y, start_x + 100, start_y + 100, fill="blue")
         move_func(circle, 0, 0, move_func)
 
