@@ -44,19 +44,17 @@ def redraw():
     if 2<= len(q_blade_xy):
         while rad != 50 :
             x,y = q_blade_xy.popleft(),q_blade_xy.popleft()
-            rad +=2
+            rad +=1
             canvas.create_oval(x-rad, y-rad, x+rad, y+rad, fill="red",tags="blade")
-            if len(q_blade_xy)<(50/2*2*2)-2:
-                q_blade_xy.append(x)
-                q_blade_xy.append(y)
     if rad==50:
         while rad != 0 :
             x,y = q_blade_xy.popleft(),q_blade_xy.popleft()
-            rad -=2
+            rad -=1
             canvas.create_oval(x-rad, y-rad, x+rad, y+rad, fill="red",tags="blade")
-            if len(q_blade_xy)<(50/2*2*2)-2:
-                q_blade_xy.append(x)
-                q_blade_xy.append(y)    
+
+    if len(q_blade_xy)<(50*2*2)-2:
+        q_blade_xy.append(x)
+        q_blade_xy.append(y)    
 
 
 def draw_circle(event):
@@ -72,10 +70,10 @@ root.title("Draw Circle on Right Click")
 q_blade_xy = deque()
 
 width, height = 800, 600
-
-
+root.geometry("900x700")
 canvas = tk.Canvas(root, width=width, height=height, bg="white")
 canvas.pack()
+
 canvas.bind("<B1-Motion>", draw_circle)  
 
 root.mainloop()
