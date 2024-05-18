@@ -1,39 +1,8 @@
-# import tkinter as tk
-
-# def motion(event):
-    # x, y = event.x, event.y
-    # print(f"Курсор находится в точке ({x}, {y})")
-
-# root = tk.Tk()
-# root.title("Отслеживание движения курсора")
-# root.geometry("800x600")
-
-# frame = tk.Frame(root, width=800, height=600)
-# frame.bind("<B1-Motion>", motion)  # ЛКМ имеет код B1
-# frame.pack()
-
-# root.mainloop()
-
-# import tkinter as tk
-# root = tk.Tk()
-# root.title("Fruit Ninja Blade")
-# root.geometry("800x600")
-
-# canvas = tk.Canvas(root, bg="white", width=800, height=600)
-# canvas.pack()
-
-# def draw_blade(event):
-    # x, y = event.x, event.y
-    # canvas.delete("blade")
-    # canvas.create_line(0, 0, x, y, fill="black", width=5, tags="blade")
-
-# canvas.bind("<B1-Motion>", draw_blade)
-
-# root.mainloop()
 import tkinter as tk
 from collections import deque
 from array import *
 import random
+import time
 
 def redraw():
     if len(q_blade_xy) == 2 :
@@ -88,40 +57,40 @@ def coordinates_fruits():
         x+=1
 
 def fly_fruits():
+    rand_dot()
+    rand = random.randint(1, 3)
     for i in range(0,202,2):
-        x=coordinates16_xy[i]+300
-        y=coordinates16_xy[i+1]+100
-        rad= 50
-        canvas.create_oval(x-rad, y-rad, x+rad, y+rad, fill="chartreuse",tags="fruit")
-    for i in range(0,202,2):
-        x=coordinates64_xy[i]+500
-        y=coordinates64_xy[i+1]+100
-        rad= 50
-        canvas.create_oval(x-rad, y-rad, x+rad, y+rad, fill="red",tags="fruit")
-    for i in range(0,202,2):
-        x=coordinates128_xy[i]+600
-        y=coordinates128_xy[i+1]+100
-        rad= 50
-        canvas.create_oval(x-rad, y-rad, x+rad, y+rad, fill="darkred",tags="fruit")
+        if rand==1 :
+            x=coordinates16_xy[i]+dotx
+            y=coordinates16_xy[i+1]+100
+            rad=50
+            canvas.create_oval(x-rad, y-rad, x+rad, y+rad, fill="aqua",tags="fruit")
+        if rand==2 :
+            x=coordinates64_xy[i]+dotx
+            y=coordinates64_xy[i+1]+100
+            rad=50
+            canvas.create_oval(x-rad, y-rad, x+rad, y+rad, fill="chartreuse",tags="fruit")
+        if rand==3 :
+            x=coordinates128_xy[i]+dotx
+            y=coordinates128_xy[i+1]+100
+            rad=50
+            canvas.create_oval(x-rad, y-rad, x+rad, y+rad, fill="blanchedalmond",tags="fruit")
+    
 
     
 def rand_dot():
+    global dotx
     w = root.winfo_screenwidth()
-    number = random.randint(0, w)
-    
-
-
+    dotx = random.randint(150, w-300)
 
 root = tk.Tk()
 root.title("Draw Circle on Right Click")
 q_blade_xy = deque()
 idle_timer = root.after(1000, clear_circles) 
 coordinates16_xy,coordinates64_xy,coordinates128_xy= array('i'),array('i'),array('i')
+dotx=0
 coordinates_fruits() 
 
-print(len(coordinates16_xy))
-print(len(coordinates64_xy))
-print(len(coordinates128_xy))
 
 width, height = 1366, 768
 root.geometry("1366x768")
