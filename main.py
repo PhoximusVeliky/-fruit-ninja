@@ -33,6 +33,7 @@
 import tkinter as tk
 from collections import deque
 from array import *
+import random
 
 def redraw():
     if len(q_blade_xy) == 2 :
@@ -76,15 +77,38 @@ def clear_circles():
 
 def coordinates_fruits():
     global coordinates1_xy,coordinates4_xy,coordinates16_xy
-    x=-100
-    while x != 101: # иначе в 16 не хватает одного
-        if -25<=x<=25   and x*x % 1  == 0:
-            coordinates1_xy.extend([x,(x*x)//1])
-        if -50<=x<=50   and x*x % 4  == 0:
-            coordinates4_xy.extend([x,(x*x)//4])
-        if -100<=x<=100 and x*x % 16 == 0:
-            coordinates16_xy.extend([x,(x*x)//16])
+    x=-800
+    while x != 801: # иначе не хватает одного
+        if -100*2<=x<=100*2 and x*x % 16 == 0:
+            coordinates16_xy.extend([x//2,((x*x)//16)//2])
+        if -200*2<=x<=200*2 and x*x % 64 == 0:
+            coordinates64_xy.extend([x//2,((x*x)//64)//2])
+        if -400*2<=x<=400*2 and x*x % 128 == 0:
+            coordinates128_xy.extend([x//2,((x*x)//128)//2])
         x+=1
+
+def fly_fruits():
+    for i in range(0,202,2):
+        x=coordinates16_xy[i]+300
+        y=coordinates16_xy[i+1]+100
+        rad= 50
+        canvas.create_oval(x-rad, y-rad, x+rad, y+rad, fill="chartreuse",tags="fruit")
+    for i in range(0,202,2):
+        x=coordinates64_xy[i]+500
+        y=coordinates64_xy[i+1]+100
+        rad= 50
+        canvas.create_oval(x-rad, y-rad, x+rad, y+rad, fill="red",tags="fruit")
+    for i in range(0,202,2):
+        x=coordinates128_xy[i]+600
+        y=coordinates128_xy[i+1]+100
+        rad= 50
+        canvas.create_oval(x-rad, y-rad, x+rad, y+rad, fill="darkred",tags="fruit")
+
+    
+def rand_dot():
+    w = root.winfo_screenwidth()
+    number = random.randint(0, w)
+    
 
 
 
@@ -92,17 +116,18 @@ root = tk.Tk()
 root.title("Draw Circle on Right Click")
 q_blade_xy = deque()
 idle_timer = root.after(1000, clear_circles) 
-coordinates1_xy,coordinates4_xy,coordinates16_xy = array('i'),array('i'),array('i')
+coordinates16_xy,coordinates64_xy,coordinates128_xy= array('i'),array('i'),array('i')
+coordinates_fruits() 
 
-coordinates_fruits()
-print(len(coordinates1_xy))
-print(len(coordinates4_xy))
 print(len(coordinates16_xy))
-width, height = 800, 600
-root.geometry("900x700")
+print(len(coordinates64_xy))
+print(len(coordinates128_xy))
+
+width, height = 1366, 768
+root.geometry("1366x768")
 canvas = tk.Canvas(root, width=width, height=height, bg="white")
 canvas.pack()
 
 canvas.bind("<B1-Motion>", draw_circle)  
-
+fly_fruits()
 root.mainloop()
