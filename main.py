@@ -45,7 +45,7 @@ def clear_circles():
     q_blade_xy.clear()
 
 def coordinates_fruits():
-    global coordinates1_xy,coordinates4_xy,coordinates16_xy
+    global coordinates128_xy,coordinates64_xy,coordinates16_xy
     x=-800
     while x != 801: # иначе не хватает одного
         if -100*2<=x<=100*2 and x*x % 16 == 0:
@@ -58,30 +58,54 @@ def coordinates_fruits():
 
 def fly_fruits():
     rand_dot()
-    rand = random.randint(1, 3)
-    for i in range(0,202,2):
-        if rand==1 :
-            x=coordinates16_xy[i]+dotx
-            y=coordinates16_xy[i+1]+100
-            rad=50
-            canvas.create_oval(x-rad, y-rad, x+rad, y+rad, fill="aqua",tags="fruit")
-        if rand==2 :
-            x=coordinates64_xy[i]+dotx
-            y=coordinates64_xy[i+1]+100
-            rad=50
-            canvas.create_oval(x-rad, y-rad, x+rad, y+rad, fill="chartreuse",tags="fruit")
-        if rand==3 :
-            x=coordinates128_xy[i]+dotx
-            y=coordinates128_xy[i+1]+100
-            rad=50
-            canvas.create_oval(x-rad, y-rad, x+rad, y+rad, fill="blanchedalmond",tags="fruit")
+    rand = random.randint(1, 1)
+    create_fruit(rand)
+    root.after(5000, delete_fruits)
+# мб классы сделать
     
+def create_fruit(rand):
+    i=0
+    while i != 204:
+        # print(i)
+    # for i in range(0, 202, 2):
+        # print(i)
+        def test(i):
+            print(i)
+            if rand == 1:
+                x = coordinates16_xy[i] + dotx
+                y = coordinates16_xy[i+1] + 100
+                rad = 50
+                # canvas.delete("fruit")  
+                canvas.create_oval(x-rad, y-rad, x+rad, y+rad, fill="aqua", tags="fruit")
+            elif rand == 2:
+                x = coordinates64_xy[i] + dotx
+                y = coordinates64_xy[i+1] + 100
+                rad = 50
+                canvas.create_oval(x-rad, y-rad, x+rad, y+rad, fill="chartreuse", tags="fruit")
+            elif rand == 3:
+                x = coordinates128_xy[i] + dotx
+                y = coordinates128_xy[i+1] + 100
+                rad = 50
+                canvas.create_oval(x-rad, y-rad, x+rad, y+rad, fill="blanchedalmond", tags="fruit")
+            # root.after(3, test)
+        def run(i):
+            # print(i)
+            root.after(10,lambda: test(i))
+        run(i)
+        i+=2
+
+def delete_fruits():
+    canvas.delete("fruit")  
+    root.after(1000, fly_fruits)  
 
     
 def rand_dot():
     global dotx
     w = root.winfo_screenwidth()
     dotx = random.randint(150, w-300)
+
+def fall_fruits():
+    print()
 
 root = tk.Tk()
 root.title("Draw Circle on Right Click")
