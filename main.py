@@ -1,9 +1,11 @@
 import tkinter as tk
 from collections import deque
 from array import *
+from tkinter import *
 import random
-import time
 
+
+ 
 def redraw():
     if len(q_blade_xy) == 2 :
        x,y = q_blade_xy.popleft(),q_blade_xy.popleft()
@@ -11,7 +13,7 @@ def redraw():
             q_blade_xy.append(x)
             q_blade_xy.append(y)
     rad=0
-    print(q_blade_xy)
+    # print(q_blade_xy)
     if 2<= len(q_blade_xy):
         while rad != 20 :
             x,y = q_blade_xy.popleft(),q_blade_xy.popleft()
@@ -38,11 +40,20 @@ def draw_circle(event):
     q_blade_xy.append(y)
     redraw()
     root.after_cancel(idle_timer)
-    idle_timer = root.after(1000, clear_circles)  # 1000 мс бездействия для очистки
+    idle_timer = root.after(1000, clear_circles) # 1000 мс бездействия для очистки
+    delete_fruits_at_cursor(x, y) #ЗДЕСЬ 
 
 def clear_circles():
     canvas.delete("blade")
     q_blade_xy.clear()
+
+def delete_fruits_at_cursor(x, y): # хз чё это 
+    items = canvas.find_overlapping(x-50, y-50, x+50, y+50)
+    for item in items:
+        tags = canvas.gettags(item)
+        if "fruit" in tags:
+            canvas.delete(item)
+
 
 def coordinates_fruits():
     global coordinates128_xy,coordinates64_xy,coordinates16_xy
@@ -54,68 +65,76 @@ def coordinates_fruits():
             coordinates64_xy.extend([x//2,((x*x)//64)//2])
         if -400*2<=x<=400*2 and x*x % 128 == 0:
             coordinates128_xy.extend([x//2,((x*x)//128)//2])
+        # if -100*2<=x<=100*2 and x*x % 2 == 0:
+        #     coordinates16_xy.extend([x//2,((x*x)//2)//2])
         x+=1
 
+def rand_dot():
+    global dotx, doty
+    dotx = random.randint(150, height-500)
+    doty = random.randint(100, width-300) 
+
+def create_fruit(fruit_type):
+    dotx = random.randint(150, width - 150)  # Generate unique x position
+    doty = random.randint(150, height - 150)  # Generate unique y position
+    img = photo_list[fruit_type - 1]
+    fruit_id = canvas.create_image(dotx, doty, image=img, tags=("fruit", f"fruit{fruit_type}"))
+    return fruit_id, dotx, doty  # Return initial positions and ID
+
 def fly_fruits():
-    rand_dot()
-    rand = random.randint(1, 1)
-    create_fruit(rand)
-    root.after(5000, delete_fruits)
-# мб классы сделать
-    
-def create_fruit(rand):
-    i=0
-    while i != 204:
-        # print(i)
-    # for i in range(0, 202, 2):
-        # print(i)
-        def test(i):
-            print(i)
-            if rand == 1:
-                x = coordinates16_xy[i] + dotx
-                y = coordinates16_xy[i+1] + 100
-                rad = 50
-                # canvas.delete("fruit")  
-                canvas.create_oval(x-rad, y-rad, x+rad, y+rad, fill="aqua", tags="fruit")
-            elif rand == 2:
-                x = coordinates64_xy[i] + dotx
-                y = coordinates64_xy[i+1] + 100
-                rad = 50
-                canvas.create_oval(x-rad, y-rad, x+rad, y+rad, fill="chartreuse", tags="fruit")
-            elif rand == 3:
-                x = coordinates128_xy[i] + dotx
-                y = coordinates128_xy[i+1] + 100
-                rad = 50
-                canvas.create_oval(x-rad, y-rad, x+rad, y+rad, fill="blanchedalmond", tags="fruit")
-            # root.after(3, test)
-        def run(i):
-            # print(i)
-            root.after(10,lambda: test(i))
-        run(i)
-        i+=2
+    global fruit_positions  # Dictionary to track each fruit's position
+    fruit_positions = {}
+    for fruit_type in range(1, 4):  # For three different fruits
+        fruit_id, dotx, doty = create_fruit(fruit_type)
+        fruit_positions[fruit_id] = (dotx, doty)
+        move_fruit(0, fruit_id, fruit_type, dotx, doty)
+
+def move_fruit(i, fruit_id, fruit_type, dotx, doty):
+    if fruit_id not in fruit_positions:
+        return  # Exit the function if the fruit_id is no longer valid
+
+    coordinates = [coordinates16_xy, coordinates64_xy, coordinates128_xy][fruit_type - 1]
+    if i < len(coordinates) - 1:
+        x = coordinates[i] + dotx
+        y = coordinates[i+1] + doty
+        fruit_x, fruit_y = fruit_positions[fruit_id]
+        dx = x - fruit_x
+        dy = y - fruit_y
+        canvas.move(fruit_id, dx, dy)
+        fruit_positions[fruit_id] = (x, y)  # Update position in the dictionary
+        root.after(100, lambda: move_fruit(i + 2, fruit_id, fruit_type, dotx, doty))
+    else:
+        root.after(100, fly_fruits)
 
 def delete_fruits():
     canvas.delete("fruit")  
-    root.after(1000, fly_fruits)  
+    root.after(100, fly_fruits)  
+    pass
 
     
-def rand_dot():
-    global dotx
-    w = root.winfo_screenwidth()
-    dotx = random.randint(150, w-300)
 
-def fall_fruits():
-    print()
+
 
 root = tk.Tk()
+photo_list = [
+    tk.PhotoImage(file = "photo/coconut.png"),
+    tk.PhotoImage(file = "photo/melon.png"),
+    tk.PhotoImage(file = "photo/orange.png"),
+    tk.PhotoImage(file = "photo/coconut_past.png"),
+    tk.PhotoImage(file = "photo/melon_past.png"),
+    tk.PhotoImage(file = "photo/orange_past.png")
+]
 root.title("Draw Circle on Right Click")
 q_blade_xy = deque()
 idle_timer = root.after(1000, clear_circles) 
 coordinates16_xy,coordinates64_xy,coordinates128_xy= array('i'),array('i'),array('i')
+coordinates_fruits()
 dotx=0
-coordinates_fruits() 
-
-
+doty=0
+fruit_id = []
+fruit_x, fruit_y, rad = 0, 0, 0
+rand_pattern = 1
+ 
 width, height = 1366, 768
 root.geometry("1366x768")
 canvas = tk.Canvas(root, width=width, height=height, bg="white")
