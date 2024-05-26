@@ -7,9 +7,9 @@ import random
 
  
 def redraw():
-    if len(q_blade_xy) == 2 :
-       x,y = q_blade_xy.popleft(),q_blade_xy.popleft()
-       while  len(q_blade_xy) != ((20+20/4)*2):
+    if len(q_blade_xy) == 2:
+        x, y = q_blade_xy.popleft(), q_blade_xy.popleft()
+        while len(q_blade_xy) != ((20+20/4)*2):
             q_blade_xy.append(x)
             q_blade_xy.append(y)
     rad=0
@@ -22,15 +22,15 @@ def redraw():
             if len(q_blade_xy)<((20+20/4)*2)-2:
                 q_blade_xy.append(x)
                 q_blade_xy.append(y)
-                
-    if rad==20:
-        while rad != 0 :
-            x,y = q_blade_xy.popleft(),q_blade_xy.popleft()
-            rad -=4
-            canvas.create_oval(x-rad, y-rad, x+rad, y+rad, fill="red",tags="blade")
-            if len(q_blade_xy)<((20+20/4)*2)-2:
+
+    if rad == 20:
+        while rad != 0:
+            x,y=q_blade_xy.popleft(), q_blade_xy.popleft()
+            rad-=4
+            canvas.create_oval(x-rad,y-rad,x+rad,y+rad, fill="red", tags="blade")
+            if len(q_blade_xy) < ((20+20/4)*2)-2:
                 q_blade_xy.append(x)
-                q_blade_xy.append(y)                
+                q_blade_xy.append(y)
 
 def draw_circle(event):
     global idle_timer
@@ -56,14 +56,14 @@ def delete_fruits_at_cursor(x, y): # хз чё это
 
 
 def coordinates_fruits():
-    global coordinates128_xy,coordinates64_xy,coordinates16_xy
-    x=-800
-    while x != 801: # иначе не хватает одного
+    global coordinates16_xy, coordinates64_xy, coordinates128_xy
+    x = -800
+    while x != 801: 
         if -100*2<=x<=100*2 and x*x % 16 == 0:
             coordinates16_xy.extend([x//2,((x*x)//16)//2])
         if -200*2<=x<=200*2 and x*x % 64 == 0:
             coordinates64_xy.extend([x//2,((x*x)//64)//2])
-        if -400*2<=x<=400*2 and x*x % 128 == 0:
+        if -400*2<= x<=400*2 and x*x % 128 == 0:
             coordinates128_xy.extend([x//2,((x*x)//128)//2])
         # if -100*2<=x<=100*2 and x*x % 2 == 0:
         #     coordinates16_xy.extend([x//2,((x*x)//2)//2])
@@ -140,6 +140,6 @@ root.geometry("1366x768")
 canvas = tk.Canvas(root, width=width, height=height, bg="white")
 canvas.pack()
 
-canvas.bind("<B1-Motion>", draw_circle)  
+canvas.bind("<B1-Motion>", draw_circle)
 fly_fruits()
 root.mainloop()
