@@ -143,3 +143,5 @@ canvas.pack()
 canvas.bind("<B1-Motion>", draw_circle)
 fly_fruits()
 root.mainloop()
+# что то с гитом 
+# он сломался ?
