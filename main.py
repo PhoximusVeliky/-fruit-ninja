@@ -40,7 +40,7 @@ def draw_circle(event):
     q_blade_xy.append(y)
     redraw()
     root.after_cancel(idle_timer)
-    idle_timer = root.after(1000, clear_circles) # 1000 мс бездействия для очистки
+    idle_timer = root.after(200, clear_circles) # 1000 мс бездействия для очистки
     delete_fruits_at_cursor(x, y) #ЗДЕСЬ 
 
 def clear_circles():
