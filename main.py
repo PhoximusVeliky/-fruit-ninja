@@ -46,26 +46,27 @@ def clear_circles():
     canvas.delete("blade")
     q_blade_xy.clear()
 
-def delete_fruits_at_cursor(x, y): # хз чё это 
+def delete_fruits_at_cursor(x, y):
     items = canvas.find_overlapping(x-50, y-50, x+50, y+50)
     for item in items:
         tags = canvas.gettags(item)
         if "fruit" in tags:
             canvas.delete(item)
 
-
 def coordinates_fruits():
-    global coordinates16_xy, coordinates64_xy, coordinates128_xy
+    global coordinates16_xy, coordinates64_xy, coordinates128_xy,fallr,falll
     x = -800
     while x != 801: 
-        if -100*2<=x<=100*2 and x*x % 16 == 0:
+        if  -100*2<=x<=100*2 and x*x % 16 == 0:
             coordinates16_xy.extend([x//2,((x*x)//16)//2])
-        if -200*2<=x<=200*2 and x*x % 64 == 0:
+        if  -200*2<=x<=200*2 and x*x % 64 == 0:
             coordinates64_xy.extend([x//2,((x*x)//64)//2])
-        if -400*2<= x<=400*2 and x*x % 128 == 0:
+        if  -400*2<= x<=400*2 and x*x % 128 == 0:
             coordinates128_xy.extend([x//2,((x*x)//128)//2])
-        # if x<=100*2 and x*x % 2 == 0:
-        #     coordinates16_xy.extend([x//2,((x*x)//2)//2])
+        if   0<=x<=100*2 and x*x % 16 == 0:
+            fallr.extend([x//2,((x*x)//16)//2])
+        if  -100*2<=x<=0 and x*x % 16 == 0:
+            falll.extend([x//2,((x*x)//16)//2])
         x+=1
 
 def rand_dot():
@@ -74,23 +75,23 @@ def rand_dot():
     doty = random.randint(100, width-300) 
 
 def create_fruit(fruit_type):
-    dotx = random.randint(150, width - 150)  # Generate unique x position
-    doty = random.randint(150, height - 150)  # Generate unique y position
+    dotx = random.randint(150, width - 150)  
+    doty = random.randint(100, height // 2 - 50)
     img = photo_list[fruit_type]
     fruit_id = canvas.create_image(dotx, doty, image=img, tags=("fruit", f"fruit{fruit_type}"))
-    return fruit_id, dotx, doty  # Return initial positions and ID
+    return fruit_id, dotx, doty  
 
 def fly_fruits():
-    global fruit_positions  # Dictionary to track each fruit's position
+    global fruit_positions  
     fruit_positions = {}
-    for fruit_type in range(0, 4):  # For three different fruits
+    for fruit_type in range(0, 4):  
         fruit_id, dotx, doty = create_fruit(fruit_type)
         fruit_positions[fruit_id] = (dotx, doty)
         move_fruit(0, fruit_id, fruit_type, dotx, doty)
 
 def move_fruit(i, fruit_id, fruit_type, dotx, doty):
     if fruit_id not in fruit_positions:
-        return  # Exit the function if the fruit_id is no longer valid
+        return  
 
     coordinates = [coordinates16_xy, coordinates64_xy, coordinates128_xy][fruit_type - 1]
     if i < len(coordinates) - 1:
@@ -100,7 +101,7 @@ def move_fruit(i, fruit_id, fruit_type, dotx, doty):
         dx = x - fruit_x
         dy = y - fruit_y
         canvas.move(fruit_id, dx, dy)
-        fruit_positions[fruit_id] = (x, y)  # Update position in the dictionary
+        fruit_positions[fruit_id] = (x, y)  
         root.after(100, lambda: move_fruit(i + 2, fruit_id, fruit_type, dotx, doty))
     else:
         root.after(100, fly_fruits)
@@ -124,13 +125,13 @@ root.title("Draw Circle on Right Click")
 q_blade_xy = deque()
 idle_timer = root.after(1000, clear_circles) 
 coordinates16_xy,coordinates64_xy,coordinates128_xy= array('i'),array('i'),array('i')
+fallr,falll= array('i'),array('i')
 coordinates_fruits()
 dotx=0
 doty=0
 fruit_id = []
 fruit_x, fruit_y, rad = 0, 0, 0
 rand_pattern = 1
- 
 width, height = 1366, 768
 root.geometry("1366x768")
 canvas = tk.Canvas(root, width=width, height=height, bg="white")
