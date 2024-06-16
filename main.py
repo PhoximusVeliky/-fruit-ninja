@@ -13,7 +13,6 @@ def redraw():
             q_blade_xy.append(x)
             q_blade_xy.append(y)
     rad=0
-    # print(q_blade_xy)
     if 2<= len(q_blade_xy):
         while rad != 20 :
             x,y = q_blade_xy.popleft(),q_blade_xy.popleft()
@@ -65,7 +64,7 @@ def coordinates_fruits():
             coordinates64_xy.extend([x//2,((x*x)//64)//2])
         if -400*2<= x<=400*2 and x*x % 128 == 0:
             coordinates128_xy.extend([x//2,((x*x)//128)//2])
-        # if -100*2<=x<=100*2 and x*x % 2 == 0:
+        # if x<=100*2 and x*x % 2 == 0:
         #     coordinates16_xy.extend([x//2,((x*x)//2)//2])
         x+=1
 
@@ -77,14 +76,14 @@ def rand_dot():
 def create_fruit(fruit_type):
     dotx = random.randint(150, width - 150)  # Generate unique x position
     doty = random.randint(150, height - 150)  # Generate unique y position
-    img = photo_list[fruit_type - 1]
+    img = photo_list[fruit_type]
     fruit_id = canvas.create_image(dotx, doty, image=img, tags=("fruit", f"fruit{fruit_type}"))
     return fruit_id, dotx, doty  # Return initial positions and ID
 
 def fly_fruits():
     global fruit_positions  # Dictionary to track each fruit's position
     fruit_positions = {}
-    for fruit_type in range(1, 4):  # For three different fruits
+    for fruit_type in range(0, 4):  # For three different fruits
         fruit_id, dotx, doty = create_fruit(fruit_type)
         fruit_positions[fruit_id] = (dotx, doty)
         move_fruit(0, fruit_id, fruit_type, dotx, doty)
@@ -109,17 +108,14 @@ def move_fruit(i, fruit_id, fruit_type, dotx, doty):
 def delete_fruits():
     canvas.delete("fruit")  
     root.after(100, fly_fruits)  
-    pass
-
-    
-
-
 
 root = tk.Tk()
 photo_list = [
+    tk.PhotoImage(file = "photo/strawberry.png"),
     tk.PhotoImage(file = "photo/coconut.png"),
     tk.PhotoImage(file = "photo/melon.png"),
     tk.PhotoImage(file = "photo/orange.png"),
+    tk.PhotoImage(file = "photo/strawberry_past.png"),
     tk.PhotoImage(file = "photo/coconut_past.png"),
     tk.PhotoImage(file = "photo/melon_past.png"),
     tk.PhotoImage(file = "photo/orange_past.png")
@@ -143,5 +139,3 @@ canvas.pack()
 canvas.bind("<B1-Motion>", draw_circle)
 fly_fruits()
 root.mainloop()
-# что то с гитом 
-# он сломался ?
