@@ -46,12 +46,16 @@ def clear_circles():
     canvas.delete("blade")
     q_blade_xy.clear()
 
-def delete_fruits_at_cursor(x, y): # хз чё это 
+def delete_fruits_at_cursor(x, y):
+    global fruit_count_label
     items = canvas.find_overlapping(x-50, y-50, x+50, y+50)
+    sliced_fruits = 0
     for item in items:
         tags = canvas.gettags(item)
         if "fruit" in tags:
             canvas.delete(item)
+            sliced_fruits += 1
+    fruit_count_label.config(text=f"Счёт: {int(fruit_count_label.cget('text').split(': ')[1]) + sliced_fruits}")
 
 
 def coordinates_fruits():
@@ -130,10 +134,12 @@ doty=0
 fruit_id = []
 fruit_x, fruit_y, rad = 0, 0, 0
 rand_pattern = 1
- 
+
 width, height = 1366, 768
 root.geometry("1366x768")
 canvas = tk.Canvas(root, width=width, height=height, bg="white")
+fruit_count_label = tk.Label(root, text="Счёт: 0", font=("Arial", 12, "bold"), fg="black")
+fruit_count_label.place(x=10, y=10)  # Adjust the position as needed
 canvas.pack()
 
 canvas.bind("<B1-Motion>", draw_circle)
