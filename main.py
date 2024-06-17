@@ -50,13 +50,17 @@ def delete_fruits_at_cursor(x, y):
     global fruit_count_label
     items = canvas.find_overlapping(x-50, y-50, x+50, y+50)
     sliced_fruits = 0
+    fruit_scores = {0: 50, 1: 10, 2: 20, 3: 10}  # Define scores for each fruit type
+
     for item in items:
         tags = canvas.gettags(item)
         if "fruit" in tags:
+            fruit_type = int(tags[1].replace("fruit", ""))
             canvas.delete(item)
-            sliced_fruits += 1
-    fruit_count_label.config(text=f"Счёт: {int(fruit_count_label.cget('text').split(': ')[1]) + sliced_fruits}")
+            # sliced_fruits += 1
+            fruit_count_label.config(text=f"Счёт: {int(fruit_count_label.cget('text').split(': ')[1]) + fruit_scores[fruit_type]}")
 
+    fruit_count_label.config(text=f"Счёт: {int(fruit_count_label.cget('text').split(': ')[1]) + sliced_fruits}")
 
 def coordinates_fruits():
     global coordinates16_xy, coordinates64_xy, coordinates128_xy
@@ -124,6 +128,7 @@ photo_list = [
     tk.PhotoImage(file = "photo/melon_past.png"),
     tk.PhotoImage(file = "photo/orange_past.png")
 ]
+
 root.title("Draw Circle on Right Click")
 q_blade_xy = deque()
 idle_timer = root.after(1000, clear_circles) 
