@@ -39,8 +39,8 @@ def draw_circle(event):
     q_blade_xy.append(y)
     redraw()
     root.after_cancel(idle_timer)
-    idle_timer = root.after(200, clear_circles) # 1000 мс бездействия для очистки
-    delete_fruits_at_cursor(x, y) #ЗДЕСЬ 
+    idle_timer = root.after(200, clear_circles)
+    delete_fruits_at_cursor(x, y)
 
 def clear_circles():
     canvas.delete("blade")
@@ -57,10 +57,21 @@ def delete_fruits_at_cursor(x, y):
         if "fruit" in tags:
             fruit_type = int(tags[1].replace("fruit", ""))
             canvas.delete(item)
-            # sliced_fruits += 1
             fruit_count_label.config(text=f"Счёт: {int(fruit_count_label.cget('text').split(': ')[1]) + fruit_scores[fruit_type]}")
+        elif "bomba" in tags:  # Check if the item is a bomb
+            canvas.delete(item)
+            fruit_count_label.config(text=f"Счёт: {int(fruit_count_label.cget('text').split(': ')[1]) - 100}")  # Deduct 100 points for hitting a bomb
+            remove_heart()
 
     fruit_count_label.config(text=f"Счёт: {int(fruit_count_label.cget('text').split(': ')[1]) + sliced_fruits}")
+
+def remove_heart():
+    if heart_ids:
+        rightmost_heart_id = heart_ids.pop()
+        canvas.delete(rightmost_heart_id)
+    if len(heart_ids) == 0:
+        canvas.create_text(width/2, height/2, text=f"Game Over! Your Score: {int(fruit_count_label.cget('text').split(': ')[1])}", font=("Arial", 24, "bold"), fill="red")
+        root.after_cancel(idle_timer)
 
 def coordinates_fruits():
     global coordinates16_xy, coordinates64_xy, coordinates128_xy
@@ -84,19 +95,22 @@ def rand_dot():
 def create_fruit(fruit_type):
     dotx = random.randint(150, width - 150)  # Generate unique x position
     doty = random.randint(150, height - 150)  # Generate unique y position
-    img = photo_list[fruit_type]
-    fruit_id = canvas.create_image(dotx, doty, image=img, tags=("fruit", f"fruit{fruit_type}"))
+    if random.random() < 0.8:  # 10% chance of creating a bomb
+        img = photo_list[4]  # Assuming the bomb image is at index 4 in photo_list
+        fruit_id = canvas.create_image(dotx, doty, image=img, tags=("bomba"))
+    else:
+        img = photo_list[fruit_type]
+        fruit_id = canvas.create_image(dotx, doty, image=img, tags=("fruit", f"fruit{fruit_type}"))
     return fruit_id, dotx, doty  # Return initial positions and ID
 
 def fly_fruits():
-    global fruit_positions  # Dictionary to track each fruit's position
+    global fruit_positions
     fruit_positions = {}
-    for fruit_type in range(0, 4):  # For three different fruits
+    for fruit_type in range(0, 4):
         fruit_id, dotx, doty = create_fruit(fruit_type)
         fruit_positions[fruit_id] = (dotx, doty)
-        move_fruit(0, fruit_id, fruit_type, dotx, doty)
-
-def move_fruit(i, fruit_id, fruit_type, dotx, doty):
+        move_fruit(0, fruit_id, fruit_type, dotx, doty, timestop)
+def move_fruit(i, fruit_id, fruit_type, dotx, doty, timestop):
     if fruit_id not in fruit_positions:
         return  # Exit the function if the fruit_id is no longer valid
 
@@ -105,17 +119,27 @@ def move_fruit(i, fruit_id, fruit_type, dotx, doty):
         x = coordinates[i] + dotx
         y = coordinates[i+1] + doty
         fruit_x, fruit_y = fruit_positions[fruit_id]
-        dx = x - fruit_x
-        dy = y - fruit_y
+        dx = (x - fruit_x) * timestop  # Adjust speed based on timestop coefficient
+        dy = (y - fruit_y) * timestop
         canvas.move(fruit_id, dx, dy)
         fruit_positions[fruit_id] = (x, y)  # Update position in the dictionary
-        root.after(100, lambda: move_fruit(i + 2, fruit_id, fruit_type, dotx, doty))
+        root.after(100, lambda: move_fruit(i + 2, fruit_id, fruit_type, dotx, doty, timestop))
     else:
         root.after(100, fly_fruits)
 
 def delete_fruits():
     canvas.delete("fruit")  
-    root.after(100, fly_fruits)  
+    root.after(100, fly_fruits)
+
+def create_hearts():
+    global heart_ids
+    heart_ids = []  # Initialize a list to store heart IDs
+    for i in range(3):
+        heart_img = photo_list[9]  # Assuming the heart image is at index 9 in photo_list
+        heart_id = canvas.create_image(50 + i * 100, 50, image=heart_img, tags=("heart", f"heart{i}"))
+        heart_ids.append(heart_id)
+    
+
 
 root = tk.Tk()
 photo_list = [
@@ -123,10 +147,12 @@ photo_list = [
     tk.PhotoImage(file = "photo/coconut.png"),
     tk.PhotoImage(file = "photo/melon.png"),
     tk.PhotoImage(file = "photo/orange.png"),
+    tk.PhotoImage(file = "photo/bomba.png"),
     tk.PhotoImage(file = "photo/strawberry_past.png"),
     tk.PhotoImage(file = "photo/coconut_past.png"),
     tk.PhotoImage(file = "photo/melon_past.png"),
-    tk.PhotoImage(file = "photo/orange_past.png")
+    tk.PhotoImage(file = "photo/orange_past.png"),
+    tk.PhotoImage(file = "photo/HP.png"),
 ]
 
 root.title("Draw Circle on Right Click")
@@ -139,13 +165,15 @@ doty=0
 fruit_id = []
 fruit_x, fruit_y, rad = 0, 0, 0
 rand_pattern = 1
+timestop = 1.5
 
 width, height = 1366, 768
 root.geometry("1366x768")
 canvas = tk.Canvas(root, width=width, height=height, bg="white")
 fruit_count_label = tk.Label(root, text="Счёт: 0", font=("Arial", 12, "bold"), fg="black")
-fruit_count_label.place(x=10, y=10)  # Adjust the position as needed
+fruit_count_label.place(x=10, y=100)  # Adjust the position as needed
 canvas.pack()
+create_hearts()  
 
 canvas.bind("<B1-Motion>", draw_circle)
 fly_fruits()
