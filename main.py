@@ -48,7 +48,7 @@ def clear_circles():
     q_blade_xy.clear()
 
 def delete_fruits_at_cursor(x, y):
-    global fruit_count_label
+    global fruit_count_label, score
     items = canvas.find_overlapping(x-50, y-50, x+50, y+50)
     sliced_fruits = 0
     fruit_scores = {0: 50, 1: 10, 2: 20, 3: 10}  # Define scores for each fruit type
@@ -58,15 +58,15 @@ def delete_fruits_at_cursor(x, y):
         if "fruit" in tags:
             fruit_type = int(tags[1].replace("fruit", ""))
             canvas.delete(item)
-            fruit_count_label.config(text=f"Счёт: {int(fruit_count_label.cget('text').split(': ')[1]) + fruit_scores[fruit_type]}")
+            score += fruit_scores[fruit_type]
+            fruit_count_label.config(text=f"Счёт: {score}")
         elif "bomba" in tags:  # Check if the item is a bomb
             canvas.delete(item)
-            fruit_count_label.config(text=f"Счёт: {int(fruit_count_label.cget('text').split(': ')[1]) - 100}")  # Deduct 100 points for hitting a bomb
+            score -= 100  # Deduct 100 points for hitting a bomb
+            fruit_count_label.config(text=f"Счёт: {score}")
             remove_heart()
 
-    fruit_count_label.config(text=f"Счёт: {int(fruit_count_label.cget('text').split(': ')[1]) + sliced_fruits}")
-
-
+    fruit_count_label.config(text=f"Счёт: {score + sliced_fruits}")
 
 def coordinates_fruits():
     global coordinates16_xy, coordinates64_xy, coordinates128_xy
@@ -99,9 +99,11 @@ def create_fruit(fruit_type):
     return fruit_id, dotx, doty  # Return initial positions and ID
 
 def fly_fruits():
-    global fruit_positions, timestop
+    global fruit_positions, timestop,stop_fly_fruits
     fruit_positions = {}
     for fruit_type in range(0, 4):
+        if stop_fly_fruits:
+            break
         fruit_id, dotx, doty = create_fruit(fruit_type)
         fruit_positions[fruit_id] = (dotx, doty)
         move_fruit(0, fruit_id, fruit_type, dotx, doty)
@@ -147,24 +149,36 @@ def create_hearts():
         heart_ids.append(heart_id)
 
 def start_game():
-    global fruit_count_label, heart_ids
-    button1.place_forget()
-    button2.place_forget()
+    global fruit_count_label, heart_ids, stop_fly_fruits, score
+    stop_fly_fruits = False
+    score = 0
+    for widget in root.winfo_children():
+        if widget != canvas:
+            widget.destroy()
+            canvas.delete(id)
     fruit_count_label = tk.Label(root, text="Счёт: 0", font=("Arial", 12, "bold"), fg="black")
     fruit_count_label.place(x=10, y=10) 
     create_hearts()
     fly_fruits()  
 
 def game_over_window():
+    global id, stop_fly_fruits
+    stop_fly_fruits = True
     rect_width = 250
     rect_height = 250
     x1 = (width - rect_width) // 2
     y1 = (height - rect_height) // 2
     x2 = x1 + rect_width
     y2 = y1 + rect_height
-    canvas.create_rectangle(x1, y1, x2, y2, fill="white")
-    button3 = tk.Button(root, text="Button Text", command=game_over_window, width=15, height=2)
-    button3.place(relx=1.0, rely=1.0, anchor='se')
+    id=canvas.create_rectangle(x1, y1, x2, y2, fill="white")
+    # Assuming `canvas` is the tkinter Canvas object
+    score_label = tk.Label(root, text="Score: 100", font=("Arial", 12, "bold"), fg="black")
+    score_window = canvas.create_window(x1 + 125, y1 + 125, anchor='center', window=score_label, width=100, height=50)
+    button = tk.Button(root, text="выйти в меню", command=menu)
+    button_window = canvas.create_window(x2-20, y2-10, anchor='se', window=button, width=100, height=50)
+    button = tk.Button(root, text="новая игра", command=start_game)
+    button_window = canvas.create_window(x1+120, y2-10, anchor='se', window=button, width=100, height=50)
+
 
 
 def remove_heart():
@@ -177,6 +191,16 @@ def remove_heart():
         game_over_window()
         root.after_cancel(idle_timer)
 
+def menu ():
+    for widget in root.winfo_children():
+        if widget != canvas:
+            widget.destroy()
+            canvas.delete(id)
+    button1 = tk.Button(root, text="начать игру", command=start_game, width=20, height=2)
+    button1.place(relx=0.5, rely=0.4, anchor='center')
+    button2 = tk.Button(root, text="выход", command=root.destroy, width=20, height=2)
+    button2.place(relx=0.5, rely=0.5, anchor='center')
+                  
 root = tk.Tk()
 photo_list = [
     tk.PhotoImage(file = "photo/strawberry.png"),
@@ -203,6 +227,8 @@ fruit_id = []
 fruit_x, fruit_y, rad = 0, 0, 0
 rand_pattern = 1
 timestop = 1.7
+stop_fly_fruits = False
+score = 0
 
 width, height = 1366, 768
 root.geometry("1366x768")
@@ -212,17 +238,8 @@ canvas = tk.Canvas(root, width=width, height=height, bg="white")
 # resized_image = original_image.subsample(3, 4)  
 # canvas.create_image(0, 0, anchor='nw', image=resized_image)
 
-button1 = tk.Button(root, text="Start Game", command=start_game, width=20, height=2)
-button1.place(relx=0.5, rely=0.4, anchor='center')
-button2 = tk.Button(root, text="Exit Game", command=root.destroy, width=20, height=2)
-button2.place(relx=0.5, rely=0.5, anchor='center')
-
-game_over_window()
+menu ()
 canvas.pack()
-
-
-
-
 root.bind("<Shift_L>", toggle_timestop)
 canvas.bind("<B1-Motion>", draw_circle)
 
