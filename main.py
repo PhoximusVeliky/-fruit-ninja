@@ -3,6 +3,7 @@ from collections import deque
 from array import *
 from tkinter import *
 import random
+import time
 
 
  
@@ -65,13 +66,7 @@ def delete_fruits_at_cursor(x, y):
 
     fruit_count_label.config(text=f"Счёт: {int(fruit_count_label.cget('text').split(': ')[1]) + sliced_fruits}")
 
-def remove_heart():
-    if heart_ids:
-        rightmost_heart_id = heart_ids.pop()
-        canvas.delete(rightmost_heart_id)
-    if len(heart_ids) == 0:
-        canvas.create_text(width/2, height/2, text=f"Game Over! Your Score: {int(fruit_count_label.cget('text').split(': ')[1])}", font=("Arial", 24, "bold"), fill="red")
-        root.after_cancel(idle_timer)
+
 
 def coordinates_fruits():
     global coordinates16_xy, coordinates64_xy, coordinates128_xy
@@ -94,7 +89,7 @@ def rand_dot():
 
 def create_fruit(fruit_type):
     dotx = random.randint(150, width - 150)  # Generate unique x position
-    doty = random.randint(150, height - 150)  # Generate unique y position
+    doty = random.randint(50, height // 2 - 150)  # Generate unique y position
     if random.random() < 0.8:  # 10% chance of creating a bomb
         img = photo_list[4]  # Assuming the bomb image is at index 4 in photo_list
         fruit_id = canvas.create_image(dotx, doty, image=img, tags=("bomba"))
@@ -104,13 +99,15 @@ def create_fruit(fruit_type):
     return fruit_id, dotx, doty  # Return initial positions and ID
 
 def fly_fruits():
-    global fruit_positions
+    global fruit_positions, timestop
     fruit_positions = {}
     for fruit_type in range(0, 4):
         fruit_id, dotx, doty = create_fruit(fruit_type)
         fruit_positions[fruit_id] = (dotx, doty)
-        move_fruit(0, fruit_id, fruit_type, dotx, doty, timestop)
-def move_fruit(i, fruit_id, fruit_type, dotx, doty, timestop):
+        move_fruit(0, fruit_id, fruit_type, dotx, doty)
+
+def move_fruit(i, fruit_id, fruit_type, dotx, doty):
+    global timestop
     if fruit_id not in fruit_positions:
         return  # Exit the function if the fruit_id is no longer valid
 
@@ -123,9 +120,19 @@ def move_fruit(i, fruit_id, fruit_type, dotx, doty, timestop):
         dy = (y - fruit_y) * timestop
         canvas.move(fruit_id, dx, dy)
         fruit_positions[fruit_id] = (x, y)  # Update position in the dictionary
-        root.after(100, lambda: move_fruit(i + 2, fruit_id, fruit_type, dotx, doty, timestop))
+        root.after(100, lambda: move_fruit(i + 2, fruit_id, fruit_type, dotx, doty))
     else:
         root.after(100, fly_fruits)
+
+def toggle_timestop(event):
+    global timestop
+    if timestop == 1.7:
+        # start_time = time.time()
+        # while time.time() - start_time < 10 and timestop == 0.8:
+        timestop = 0.8
+    else:
+        timestop = 1.7
+        
 
 def delete_fruits():
     canvas.delete("fruit")  
@@ -136,10 +143,39 @@ def create_hearts():
     heart_ids = []  # Initialize a list to store heart IDs
     for i in range(3):
         heart_img = photo_list[9]  # Assuming the heart image is at index 9 in photo_list
-        heart_id = canvas.create_image(50 + i * 100, 50, image=heart_img, tags=("heart", f"heart{i}"))
+        heart_id = canvas.create_image(50 + i * 100, 100, image=heart_img, tags=("heart", f"heart{i}"))
         heart_ids.append(heart_id)
-    
 
+def start_game():
+    global fruit_count_label, heart_ids
+    button1.place_forget()
+    button2.place_forget()
+    fruit_count_label = tk.Label(root, text="Счёт: 0", font=("Arial", 12, "bold"), fg="black")
+    fruit_count_label.place(x=10, y=10) 
+    create_hearts()
+    fly_fruits()  
+
+def game_over_window():
+    rect_width = 250
+    rect_height = 250
+    x1 = (width - rect_width) // 2
+    y1 = (height - rect_height) // 2
+    x2 = x1 + rect_width
+    y2 = y1 + rect_height
+    canvas.create_rectangle(x1, y1, x2, y2, fill="white")
+    button3 = tk.Button(root, text="Button Text", command=game_over_window, width=15, height=2)
+    button3.place(relx=1.0, rely=1.0, anchor='se')
+
+
+def remove_heart():
+    if heart_ids:
+        rightmost_heart_id = heart_ids.pop()
+        canvas.delete(rightmost_heart_id)
+    if len(heart_ids) == 0:
+        canvas.delete("all")
+        fruit_count_label.destroy() 
+        game_over_window()
+        root.after_cancel(idle_timer)
 
 root = tk.Tk()
 photo_list = [
@@ -153,6 +189,7 @@ photo_list = [
     tk.PhotoImage(file = "photo/melon_past.png"),
     tk.PhotoImage(file = "photo/orange_past.png"),
     tk.PhotoImage(file = "photo/HP.png"),
+    tk.PhotoImage(file = "photo/48377.png"),
 ]
 
 root.title("Draw Circle on Right Click")
@@ -165,16 +202,28 @@ doty=0
 fruit_id = []
 fruit_x, fruit_y, rad = 0, 0, 0
 rand_pattern = 1
-timestop = 1.5
+timestop = 1.7
 
 width, height = 1366, 768
 root.geometry("1366x768")
 canvas = tk.Canvas(root, width=width, height=height, bg="white")
-fruit_count_label = tk.Label(root, text="Счёт: 0", font=("Arial", 12, "bold"), fg="black")
-fruit_count_label.place(x=10, y=100)  # Adjust the position as needed
-canvas.pack()
-create_hearts()  
 
+# original_image = photo_list[10] #замена
+# resized_image = original_image.subsample(3, 4)  
+# canvas.create_image(0, 0, anchor='nw', image=resized_image)
+
+button1 = tk.Button(root, text="Start Game", command=start_game, width=20, height=2)
+button1.place(relx=0.5, rely=0.4, anchor='center')
+button2 = tk.Button(root, text="Exit Game", command=root.destroy, width=20, height=2)
+button2.place(relx=0.5, rely=0.5, anchor='center')
+
+game_over_window()
+canvas.pack()
+
+
+
+
+root.bind("<Shift_L>", toggle_timestop)
 canvas.bind("<B1-Motion>", draw_circle)
-fly_fruits()
+
 root.mainloop()
