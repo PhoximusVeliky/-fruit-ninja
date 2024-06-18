@@ -62,8 +62,9 @@ def delete_fruits_at_cursor(x, y):
             fruit_count_label.config(text=f"Счёт: {score}")
         elif "bomba" in tags:  # Check if the item is a bomb
             canvas.delete(item)
-            score -= 100  # Deduct 100 points for hitting a bomb
             fruit_count_label.config(text=f"Счёт: {score}")
+            remove_heart()
+            remove_heart()
             remove_heart()
 
     fruit_count_label.config(text=f"Счёт: {score + sliced_fruits}")
@@ -118,15 +119,18 @@ def move_fruit(i, fruit_id, fruit_type, dotx, doty):
         x = coordinates[i] + dotx
         y = coordinates[i+1] + doty
         fruit_x, fruit_y = fruit_positions[fruit_id]
-        dx = (x - fruit_x) * timestop  # Adjust speed based on timestop coefficient
+        dx = (x - fruit_x) * timestop 
         dy = (y - fruit_y) * timestop
         canvas.move(fruit_id, dx, dy)
-        fruit_positions[fruit_id] = (x, y)  # Update position in the dictionary
+        fruit_positions[fruit_id] = (x, y) 
         root.after(100, lambda: move_fruit(i + 2, fruit_id, fruit_type, dotx, doty))
     else:
-        canvas.delete(fruit_id)  # Delete the fruit that has flown the entire trajectory
-        del fruit_positions[fruit_id]  # Remove the fruit from the positions dictionary
-        root.after(100, fly_fruits)  # Start flying new fruits
+        if fruit_id in canvas.find_all():
+            if "bomba" not in canvas.gettags(fruit_id):
+                remove_heart()
+            canvas.delete(fruit_id)
+        del fruit_positions[fruit_id]
+        root.after(100, fly_fruits) 
 
 def toggle_timestop(event):
     global timestop, last_shift_press_time
@@ -191,8 +195,6 @@ def game_over_window():
     button = tk.Button(root, text="новая игра", command=start_game)
     button_window = canvas.create_window(x1+120, y2-10, anchor='se', window=button, width=100, height=50)
 
-
-
 def remove_heart():
     if heart_ids:
         rightmost_heart_id = heart_ids.pop()
@@ -204,6 +206,7 @@ def remove_heart():
         root.after_cancel(idle_timer)
 
 def menu ():
+    global id
     for widget in root.winfo_children():
         if widget != canvas:
             widget.destroy()
@@ -247,14 +250,11 @@ last_shift_press_time = time.time()
 width, height = 1366, 768
 root.geometry("1366x768")
 canvas = tk.Canvas(root, width=width, height=height, bg="white")
-
-# original_image = photo_list[10] #замена
-# resized_image = original_image.subsample(3, 4)  
-# canvas.create_image(0, 0, anchor='nw', image=resized_image)
-
+original_image = photo_list[10] #замена
+resized_image = original_image.subsample(3, 4)  
+canvas.create_image(0, 0, anchor='nw', image=resized_image)
 menu ()
 canvas.pack()
 root.bind("<Shift_L>", toggle_timestop)
 canvas.bind("<B1-Motion>", draw_circle)
-
 root.mainloop()
