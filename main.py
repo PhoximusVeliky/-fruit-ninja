@@ -124,17 +124,24 @@ def move_fruit(i, fruit_id, fruit_type, dotx, doty):
         fruit_positions[fruit_id] = (x, y)  # Update position in the dictionary
         root.after(100, lambda: move_fruit(i + 2, fruit_id, fruit_type, dotx, doty))
     else:
-        root.after(100, fly_fruits)
+        canvas.delete(fruit_id)  # Delete the fruit that has flown the entire trajectory
+        del fruit_positions[fruit_id]  # Remove the fruit from the positions dictionary
+        root.after(100, fly_fruits)  # Start flying new fruits
 
 def toggle_timestop(event):
-    global timestop
-    if timestop == 1.7:
-        # start_time = time.time()
-        # while time.time() - start_time < 10 and timestop == 0.8:
-        timestop = 0.8
-    else:
-        timestop = 1.7
+    global timestop, last_shift_press_time
+    current_time = time.time()
+    if current_time - last_shift_press_time >= 5:
+        last_shift_press_time = current_time
+        if timestop == 1.7:
+            timestop = 0.1
+            root.after(3000, lambda: change_timestop(1.7))
+        else:
+            timestop = 1.7
         
+def change_timestop(new_value):
+    global timestop
+    timestop = new_value
 
 def delete_fruits():
     canvas.delete("fruit")  
@@ -149,9 +156,10 @@ def create_hearts():
         heart_ids.append(heart_id)
 
 def start_game():
-    global fruit_count_label, heart_ids, stop_fly_fruits, score
+    global fruit_count_label, heart_ids, stop_fly_fruits, score, start_time
     stop_fly_fruits = False
     score = 0
+    start_time = time.time()
     for widget in root.winfo_children():
         if widget != canvas:
             widget.destroy()
@@ -164,6 +172,7 @@ def start_game():
 def game_over_window():
     global id, stop_fly_fruits
     stop_fly_fruits = True
+    game_duration = round(time.time() - start_time)
     rect_width = 250
     rect_height = 250
     x1 = (width - rect_width) // 2
@@ -172,8 +181,11 @@ def game_over_window():
     y2 = y1 + rect_height
     id=canvas.create_rectangle(x1, y1, x2, y2, fill="white")
     # Assuming `canvas` is the tkinter Canvas object
-    score_label = tk.Label(root, text="Score: 100", font=("Arial", 12, "bold"), fg="black")
-    score_window = canvas.create_window(x1 + 125, y1 + 125, anchor='center', window=score_label, width=100, height=50)
+    score_label = tk.Label(root, text=f"Счёт: {score}", font=("Arial", 12, "bold"), fg="black")
+    score_window = canvas.create_window(x1 + 125, y1 + 35, anchor='center', window=score_label, width=230, height=50)
+    score_label.config(text=f"Счёт: {score}")
+    time_label = tk.Label(root, text=f"Время: {game_duration} секунд", font=("Arial", 12, "bold"), fg="black")
+    time_window = canvas.create_window(x1 + 125, y1 + 70, anchor='center', window=time_label, width=230, height=50)
     button = tk.Button(root, text="выйти в меню", command=menu)
     button_window = canvas.create_window(x2-20, y2-10, anchor='se', window=button, width=100, height=50)
     button = tk.Button(root, text="новая игра", command=start_game)
@@ -229,6 +241,8 @@ rand_pattern = 1
 timestop = 1.7
 stop_fly_fruits = False
 score = 0
+start_time = None
+last_shift_press_time = time.time()
 
 width, height = 1366, 768
 root.geometry("1366x768")
