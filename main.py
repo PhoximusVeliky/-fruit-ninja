@@ -64,9 +64,8 @@ def delete_fruits_at_cursor(x, y):
         elif "bomba" in tags:  # Check if the item is a bomb
             canvas.delete(item)
             fruit_count_label.config(text=f"Счёт: {score}")
-            remove_heart()
-            remove_heart()
-            remove_heart()
+            for _ in range(len(heart_ids)):
+                remove_heart()
     
     fruit_count_label.config(text=f"Счёт: {score + sliced_fruits}")
 
@@ -105,6 +104,7 @@ def create_fruit(fruit_type):
 def fly_fruits():
     global fruit_positions, timestop,stop_fly_fruits
     fruit_positions = {}
+    timestop = 1.7
     for fruit_type in range(0, 4):
         if stop_fly_fruits:
             break
@@ -200,7 +200,7 @@ def game_over_window():
     button_window = canvas.create_window(x1+120, y2-10, anchor='se', window=button, width=100, height=50)
 
 def remove_heart():
-    global game
+    global game, heart_ids
     if heart_ids:
         rightmost_heart_id = heart_ids.pop()
         canvas.delete(rightmost_heart_id)
@@ -267,7 +267,7 @@ canvas = tk.Canvas(root, width=width, height=height, bg="white")
 original_image = photo_list[10] #замена
 resized_image = original_image.subsample(3, 4)  
 canvas.create_image(0, 0, anchor='nw', image=resized_image, tags="bg")
-menu ()
+menu()
 canvas.pack()
 root.bind("<Shift_L>", toggle_timestop)
 canvas.bind("<B1-Motion>", draw_circle)
