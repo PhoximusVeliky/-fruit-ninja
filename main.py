@@ -5,8 +5,6 @@ from tkinter import *
 import random
 import time
 
-
- 
 def redraw():
     if len(q_blade_xy) == 2:
         x, y = q_blade_xy.popleft(), q_blade_xy.popleft()
@@ -49,10 +47,10 @@ def clear_circles():
     q_blade_xy.clear()
 
 def delete_fruits_at_cursor(x, y):
-    global fruit_count_label, score
+    global fruit_count_label, score, bomb
     items = canvas.find_overlapping(x-2, y-2, x+2, y+2)
     sliced_fruits = 0
-    fruit_scores = {0: 50, 1: 10, 2: 20, 3: 10}  # Define scores for each fruit type
+    fruit_scores = {0: 50, 1: 10, 2: 20, 3: 10} 
 
     for item in items:
         tags = canvas.gettags(item)
@@ -61,13 +59,15 @@ def delete_fruits_at_cursor(x, y):
             canvas.delete(item)
             score += fruit_scores[fruit_type]
             fruit_count_label.config(text=f"Счёт: {score}")
-        elif "bomba" in tags:  # Check if the item is a bomb
+            fruit_count_label.config(text=f"Счёт: {score + sliced_fruits}")
+        elif "bomba" in tags:
+            # bomb = True
             canvas.delete(item)
-            fruit_count_label.config(text=f"Счёт: {score}")
+            # fruit_count_label.config(text=f"Счёт: {score}")
             for _ in range(len(heart_ids)):
                 remove_heart()
     
-    fruit_count_label.config(text=f"Счёт: {score + sliced_fruits}")
+    
 
 def coordinates_fruits():
     global coordinates16_xy, coordinates64_xy, coordinates128_xy,fallr,falll
@@ -91,15 +91,15 @@ def rand_dot():
     doty = random.randint(100, width-300) 
 
 def create_fruit(fruit_type):
-    dotx = random.randint(150, width - 150)  # Generate unique x position
-    doty = random.randint(50, height // 2 - 150)  # Generate unique y position
-    if random.random() < 0.5:  # 10% chance of creating a bomb
-        img = photo_list[4]  # Assuming the bomb image is at index 4 in photo_list
+    dotx = random.randint(150, width - 150)  
+    doty = random.randint(50, height // 2 - 150)  
+    if random.random() < 0.3: 
+        img = photo_list[4] 
         fruit_id = canvas.create_image(dotx, doty, image=img, tags=("bomba"))
     else:
         img = photo_list[fruit_type]
         fruit_id = canvas.create_image(dotx, doty, image=img, tags=("fruit", f"fruit{fruit_type}"))
-    return fruit_id, dotx, doty  # Return initial positions and ID
+    return fruit_id, dotx, doty  
 
 def fly_fruits():
     global fruit_positions, timestop,stop_fly_fruits
@@ -156,9 +156,9 @@ def delete_fruits():
 
 def create_hearts():
     global heart_ids
-    heart_ids = []  # Initialize a list to store heart IDs
+    heart_ids = []
     for i in range(3):
-        heart_img = photo_list[9]  # Assuming the heart image is at index 9 in photo_list
+        heart_img = photo_list[9] 
         heart_id = canvas.create_image(50 + i * 100, 100, image=heart_img, tags=("heart", f"heart{i}"))
         heart_ids.append(heart_id)
 
@@ -188,7 +188,6 @@ def game_over_window():
     x2 = x1 + rect_width
     y2 = y1 + rect_height
     id=canvas.create_rectangle(x1, y1, x2, y2, fill="white")
-    # Assuming `canvas` is the tkinter Canvas object
     score_label = tk.Label(root, text=f"Счёт: {score}", font=("Arial", 12, "bold"), fg="black")
     score_window = canvas.create_window(x1 + 125, y1 + 35, anchor='center', window=score_label, width=230, height=50)
     score_label.config(text=f"Счёт: {score}")
@@ -241,11 +240,10 @@ photo_list = [
     tk.PhotoImage(file = "photo/48377.png"),
 ]
 
-root.title("Draw Circle on Right Click")
+root.resizable(0,0)
+root.title("Ninja")
 q_blade_xy = deque()
 idle_timer = root.after(1000, clear_circles) 
-
-
 coordinates16_xy,coordinates64_xy,coordinates128_xy= array('i'),array('i'),array('i')
 fallr,falll= array('i'),array('i')
 coordinates_fruits()
@@ -259,12 +257,13 @@ stop_fly_fruits = False
 game = False
 score = 0
 start_time = None
+Bomb = False
 last_shift_press_time = time.time()
 
 width, height = 1200, 700
 root.geometry("1200x700")
 canvas = tk.Canvas(root, width=width, height=height, bg="white")
-original_image = photo_list[10] #замена
+original_image = photo_list[10] 
 resized_image = original_image.subsample(3, 4)  
 canvas.create_image(0, 0, anchor='nw', image=resized_image, tags="bg")
 menu()
